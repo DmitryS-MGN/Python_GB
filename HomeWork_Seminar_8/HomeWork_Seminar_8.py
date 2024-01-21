@@ -1,134 +1,134 @@
-import os
-import shutil
-
-#добавляет новый контакт в справочник.
-
-def add_contact(contacts):
-    фамилия = input("Введите фамилию: ")
-    имя = input("Введите имя: ")
-    отчество = input("Введите отчество: ")
-    номер_телефона = input("Введите номер телефона: ")
-    
-    контакт = {
-        "фамилия": фамилия,
-        "имя": имя,
-        "отчество": отчество,
-        "номер телефона": номер_телефона
-    }
-    
-    contacts.append(контакт)
-    print("Контакт успешно добавлен!")
-
-#выводит список контактов
-
-def print_contacts(contacts):
-    file_path = input("Введите путь к файлу с контактами: ")
-    if not os.path.exists(file_path):
-        print("Файл не существует!")
-        return
-
-    with open(file_path, 'r') as file:
-        contact_data = file.readlines()
-
-    print("Телефонный справочник:")
-    for i, line in enumerate(contact_data, start=1):
-        line = line.strip()
-        if line:
-            print(f"{i}. {line}")
-
-#сохроняет контакты
-
-def save_contacts(contacts):
-    file_path = input("Введите путь к файлу для сохранения данных: ")
-    with open(file_path, 'w') as file:
-        for contact in contacts:
-            line = f"Фамилия: {contact['фамилия']}, Имя: {contact['имя']}, Отчество: {contact['отчество']}, Номер телефона: {contact['номер телефона']}\n"
-            file.write(line)
-    print("Данные успешно сохранены!")
-
-#копирует контакты
-
-def copy_contact(src_file_path, dest_file_path, contact_number):
-    if not os.path.exists(src_file_path):
-        print("Файл-источник не существует!")
-        return
-    
-    if not os.path.exists(dest_file_path):
-        print("Файл-приемник не существует!")
-        return
-
-    with open(src_file_path, 'r') as src_file:
-        contact_data = src_file.readlines()
-    
-    if contact_number < 1 or contact_number > len(contact_data):
-        print("Неверный номер контакта!")
-        return
-
-    contact_to_copy = contact_data[contact_number-1].strip()
-    with open(dest_file_path, 'a') as dest_file:
-        dest_file.write(f"{contact_to_copy}\n")
-
-    print("Контакт успешно скопирован!")
-
-#Выводит файл
-
-def process_file(file_path):
-    with open(file_path, 'r') as file:
-        contact_data = file.readlines()
-
+# Функция для чтения данных из файла
+def read_contacts(file_name):
     contacts = []
-    for line in contact_data:
-        line = line.strip()
-        if line:
-            contacts.append(line)
-
+    with open(file_name, 'r') as file:
+        for line in file:
+            contact = line.strip().split(',')
+            contacts.append(contact)
     return contacts
 
-#Сохранение файла
-
-def save_file(file_path, contacts):
-    with open(file_path, 'w') as file:
+# Функция для записи контактов в файл
+def write_contacts(file_name, contacts):
+    with open(file_name, 'w') as file:
         for contact in contacts:
-            file.write(f"{contact}\n")
+            file.write(','.join(contact) + '\n')
 
-    print("Файл успешно сохранен!")
+# Функция для добавления нового контакта
+def add_contact(file_name):
+    last_name = input("Введите фамилию: ")
+    first_name = input("Введите имя: ")
+    patronymic = input("Введите отчество: ")
+    phone_number = input("Введите номер телефона: ")
+    contact = [last_name, first_name, patronymic, phone_number]
+    contacts = read_contacts(file_name)
+    contacts.append(contact)
+    write_contacts(file_name, contacts)
+    print("Контакт успешно добавлен.")
 
-#Выгрузка контактов
+# Функция для вывода всех контактов
+def list_contacts(file_name):
+    contacts = read_contacts(file_name)
+    if not contacts:
+        print("Телефонный справочник пуст.")
+    else:
+        for contact in contacts:
+            print(f"Фамилия: {contact[0]}, Имя: {contact[1]}, Отчество: {contact[2]}, Номер телефона: {contact[3]}")
 
-def load_contacts(file_path):
-    contacts = process_file(file_path)
-    print("Контакты успешно загружены!")
-    return contacts
+# Функция для поиска контакта по характеристике
+def search_contact(file_name):
+    search_key = input("Введите характеристику для поиска: ")
+    contacts = read_contacts(file_name)
+    found_contacts = []
+    for contact in contacts:
+        if search_key in contact:
+            found_contacts.append(contact)
+    if not found_contacts:
+        print("Контакты не найдены.")
+    else:
+        for contact in found_contacts:
+            print(f"Фамилия: {contact[0]} Имя: {contact[1]} Отчество: {contact[2]} Номер телефона: {contact[3]}")
 
-#Главный код с меню
+# Функция для удаления контакта
+def delete_contact(file_name):
+    contacts = read_contacts(file_name)
+    if not contacts:
+        print("Телефонный справочник пуст.")
+        return
+    search_key = input("Введите характеристику для поиска: ")
+    found_contacts = []
+    for contact in contacts:
+        if search_key in contact:
+            found_contacts.append(contact)
+    if not found_contacts:
+        print("Контакты не найдены.")
+    else:
+        for contact in found_contacts:
+            contacts.remove(contact)
+        write_contacts(file_name, contacts)
+        print("Контакт успешно удален.")
 
-def menu():
-    contacts = []
+# Функция для изменения контакта
+def edit_contact(file_name):
+    contacts = read_contacts(file_name)
+    if not contacts:
+        print("Телефонный справочник пуст.")
+        return
+    search_key = input("Введите характеристику для поиска: ")
+    found_contacts = []
+    for contact in contacts:
+        if search_key in contact:
+            found_contacts.append(contact)
+    if not found_contacts:
+        print("Контакты не найдены.")
+        return
 
+    new_last_name = input("Введите новую фамилию (оставьте пустым для пропуска): ")
+    new_first_name = input("Введите новое имя (оставьте пустым для пропуска): ")
+    new_patronymic = input("Введите новое отчество (оставьте пустым для пропуска): ")
+    new_phone_number = input("Введите новый номер телефона (оставьте пустым для пропуска): ")
+
+    for contact in found_contacts:
+        if new_last_name:
+            contact[0] = new_last_name
+        if new_first_name:
+            contact[1] = new_first_name
+        if new_patronymic:
+            contact[2] = new_patronymic
+        if new_phone_number:
+            contact[3] = new_phone_number
+
+    write_contacts(file_name, contacts)
+    print("Контакт успешно изменен.")
+
+# Функция для вывода меню
+def print_menu():
+    print("1. Вывести все контакты")
+    print("2. Добавить контакт")
+    print("3. Найти контакт")
+    print("4. Удалить контакт")
+    print("5. Изменить контакт")
+    print("6. Выход")
+
+# Основная функция программы
+def main():
+    file_name = "phonebook.txt"  # Имя файла для хранения контактов
     while True:
-        print("\nМеню:")
-        print("1. Добавить контакт")
-        print("2. Просмотреть контакты")
-        print("3. Сохранить контакты")
-        print("4. Скопировать контакт в другой файл")
-        print("5. Выход")
-
+        print_menu()
         choice = input("Выберите пункт меню: ")
-        
         if choice == "1":
-            add_contact(contacts)
+            list_contacts(file_name)
         elif choice == "2":
-            print_contacts(contacts)
+            add_contact(file_name)
         elif choice == "3":
-            save_contacts(contacts)
+            search_contact(file_name)
         elif choice == "4":
-            src_file_path = input("Введите путь к исходному файлу: ")
-            dest_file_path = input("Введите путь к файлу-приемнику: ")
-            contact_number = int(input("Введите порядковый номер контакта: "))
-            copy_contact(src_file_path, dest_file_path, contact_number)
+            delete_contact(file_name)
         elif choice == "5":
+            edit_contact(file_name)
+        elif choice == "6":
             break
         else:
-            print("Неверный выбор. Попробуйте еще раз.")
+            print("Неверный выбор. Попробуйте снова.")
 
-menu()
+if __name__ == "__main__":
+    main()
